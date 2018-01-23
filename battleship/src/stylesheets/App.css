@@ -1,0 +1,25 @@
+* {
+ margin: 0;
+ padding: 0;
+ border-box: none;
+}
+
+.board-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10%;
+}
+
+ td {
+    border: 3px solid black;
+    height:50px;
+    width: 50px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.cell {
+
+}
