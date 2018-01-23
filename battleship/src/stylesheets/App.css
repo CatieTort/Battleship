@@ -20,6 +20,38 @@ table {
     border-collapse: collapse;
 }
 
-.cell {
+.header-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 3%;
+}
 
+.header-items {
+    justify-content: center;
+    line-height: 30px;
+    text-align: center;
+}
+
+.scoreboard-container{
+    display: flex;
+    justify-content:space-between;
+    margin-top: 5%;
+}
+
+.score-item1 {
+    justify-content: space-around;
+    padding: 3px 15px 3px 50px;
+}
+
+.score-item2 {
+    justify-content: space-around;
+    padding: 3px 50px 3px 0;
+    margin-right: 15%;
+}
+
+.cell {
+ background-color: white;
+}
+.active {
+    background-color: red;
 }

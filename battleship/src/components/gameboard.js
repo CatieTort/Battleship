@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
+import Square from './square';
 
 class Board extends Component {
     constructor(props){
         super(props)
         this.state = {
             board: [],
-            shipCount: 5
+            shipCount: 5,
+            activeIndex: [],
+            torpedoes: 25
         }
     }
 
@@ -31,12 +34,27 @@ class Board extends Component {
         this.setState({board: board})
     }
 
-    clickHandler(x,y){
-        var newBoard = this.state.board
-        newBoard [y][x] = this.state.ship
-        this.setState({
-            board: newBoard
-        })
+    userMoves(){
+        var userHits = this.state.activeIndex.length + 1
+        var torpedoes = this.state.torpedoes
+        console.log("UserMoves:" , userHits)
+        console.log("torpedoes:" , torpedoes)
+        if (userHits < this.state.torpedoes){
+            torpedoes --
+            this.setState({torpedoes: torpedoes})
+        }else if(userHits === 5){
+            alert ("You Lose")
+        }
+    }
+
+    clickHandler(e){
+        var cell = e.target.id
+        // console.log(cell);
+        var shots = []
+        shots.push(cell)
+        this.setState({activeIndex: this.state.activeIndex.concat([cell])})
+        this.userMoves();
+        // console.log(this.state.activeIndex);
     }
 
     placeShip(board) {
@@ -46,8 +64,8 @@ class Board extends Component {
         if (board[col][row] ==  false){
             board[col][row] = true
         }
-
-        // console.log(col, " by ", row, " = ", board[col][row]);
+//TODO: ships are overlapping
+        console.log(col, " by ", row, " = ", board[col][row]);
         return board;
     }
 
@@ -58,7 +76,11 @@ class Board extends Component {
                 if (this.state.board[col][row] == true) {
                     shipExist = "ship";
                 }
-            set.push(<td className="cell" id={`${col}_${row}`} key={`${col}_${row}`} onClick="this.clickHandler(col,row).bind(this)">{shipExist}</td>);
+
+            set.push(<Square key={`${col}_${row}`} id={`${col}_${row}`} isActive={this.state.activeIndex.find((i) => {
+                return i === `${col}_${row}`
+            } ) }  onClick={this.clickHandler.bind(this)}/>);
+
         }
         return set
     }
@@ -66,13 +88,13 @@ class Board extends Component {
     createRows(){
         var rows = []
         for (let i = 0; i < 10; i++){
-            rows.push(<tr key="{i}">{this.createRow(i)}</tr>);
+            rows.push(<tr key={`${i}`}>{this.createRow(i)}</tr>);
         }
         return rows
     }
 
     render(){
-            console.log(this.state.board);
+            // console.log(this.state.board);
         return (
             <div className="board-container">
                 <table>
