@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Square from './square';
+import ScoreBoard from './scoreboard';
 
 class Board extends Component {
     constructor(props){
@@ -8,7 +9,7 @@ class Board extends Component {
             board: [],
             shipCount: 5,
             activeIndex: [],
-            torpedoes: 25
+            torpedoes: 50
         }
     }
 
@@ -34,18 +35,23 @@ class Board extends Component {
         this.setState({board: board})
     }
 
-    userMoves(){
+    userMoves(cell){
+        var userClicks = this.state.activeIndex
         var userHits = this.state.activeIndex.length + 1
         var torpedoes = this.state.torpedoes
         console.log("UserMoves:" , userHits)
         console.log("torpedoes:" , torpedoes)
-        if (userHits < this.state.torpedoes){
+        if ((userHits < this.state.torpedoes) && (userClicks.every(cell)=>{
+            return cell === cell
+        })){
             torpedoes --
             this.setState({torpedoes: torpedoes})
-        }else if(userHits === 5){
+        }else if(userHits === 50){
             alert ("You Lose")
         }
     }
+    //FIXME: if the coordiates of a cell = a value inside the array do not subtract a torpedo.
+    //4 possible states for each cell: empty, ship, miss, hit assign numbers to each within the grid
 
     clickHandler(e){
         var cell = e.target.id
@@ -53,7 +59,7 @@ class Board extends Component {
         var shots = []
         shots.push(cell)
         this.setState({activeIndex: this.state.activeIndex.concat([cell])})
-        this.userMoves();
+        this.userMoves(cell);
         // console.log(this.state.activeIndex);
     }
 
@@ -64,7 +70,7 @@ class Board extends Component {
         if (board[col][row] ==  false){
             board[col][row] = true
         }
-//TODO: ships are overlapping
+//// BUG: ships are overlapping
         console.log(col, " by ", row, " = ", board[col][row]);
         return board;
     }
@@ -96,13 +102,16 @@ class Board extends Component {
     render(){
             // console.log(this.state.board);
         return (
+            <div>
+            <div><ScoreBoard torpedoes={this.state.torpedoes} ships={this.state.shipCount}/></div>
             <div className="board-container">
-                <table>
-                    <tbody>
-                            {this.createRows()}
-                    </tbody>
-                </table>
+                    <table>
+                        <tbody>
+                                {this.createRows()}
+                        </tbody>
+                    </table>
             </div>
+        </div>
         )
     }
 }

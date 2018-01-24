@@ -11,7 +11,6 @@ class App extends Component {
     return (
       <div>
       <Header />
-        <ScoreBoard />
         <Board />
       </div>
     );
