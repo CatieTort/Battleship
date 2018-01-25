@@ -1,3 +1,4 @@
+
 * {
  margin: 0;
  padding: 0;
@@ -19,6 +20,10 @@
 table {
     border-collapse: collapse;
 }
+
+/* table:hover{
+    cursor: url('../images/accurcy.png'), auto;
+} */
 
 .header-container {
     display: flex;
