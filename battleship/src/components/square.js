@@ -5,11 +5,11 @@ class Square extends Component {
     render(){
 
         return(
-            <td className={this.props.isActive ? 'active' : 'cell'}
-            // {this.props.isShip ? 'hit' : 'miss'}
-            id={this.props.id} cellstate={this.props.cellstate} onClick={this.props.onClick}>{this.props.cellstate}</td>
+            <td className={this.props.status}
+            id={this.props.id} onClick={this.props.onClick}>{this.props.value}</td>
         )
     }
 }
+
 
 export default Square;

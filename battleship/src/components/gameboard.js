@@ -77,22 +77,29 @@ class Board extends Component {
     }
 
     clickHandler(row, col){
-        const { board, shotsRemaining } = this.state
+        let { board, shotsRemaining } = this.state
 
         console.log(row)
         console.log(col);
 
-        if (board === EMPTY ){
+        if (board[row][col] === EMPTY ){
             board[row][col] = MISS
 
-            this.setState({shotsRemaining: shotsRemaining-1})
-        } else if(board === SHIP){
+            this.setState({
+                shotsRemaining: shotsRemaining-1,
+                board: board
+            })
+        } else if(board[row][col] === SHIP){
             board[row][col] = HIT
 
-            this.setState({shotsRemaining: shotsRemaining-1})
+            this.setState({
+                shotsRemaining: shotsRemaining-1,
+                board: board
+            })
         } else if(shotsRemaining <= 0){
             alert ("You Lose")
         }
+        console.log(board);
     }
 
     //FIXME:
@@ -106,32 +113,38 @@ class Board extends Component {
 
     // TODO: shipCoordiates needs to pull random coordiates that = the number of cells that is the length of each ship ex: Destroyer length is 3 needs 3 coordiates
     renderCol(row) {
+        const { board } = this.state
+
         var cols = []
 
-            for (let col = 0; col < 10; col++){
-                // console.log(this.state.board[row][col]);
-                cols.push(
-                    <Square key={`${row}_${col}`} id={`${row}_${col}`}
-                        cellstate={this.state.board[row][col]}
-                        status={this.state.activeIndex.find((i) => {
+        for (let col = 0; col < 10; col++){
+            // console.log(this.state.board[row][col]);
+            var status = ''
+            let square = board[row][col]
 
-                                return i === `${row}_${col}`
-                        } ) }
-                    // isShip={this.state.status.find((i)=>{
-                    //     return i === this.state.status[1]
-                    // })}
-                    onClick={this.clickHandler.bind(this, row, col)}/>);
-
+            if ( square === HIT ){
+                status = 'hit'
+            }else if( square === MISS ){
+                status = 'miss'
+            }else{
+                status = 'cell'
             }
 
-            return cols
+            cols.push(
+                <Square id={row, col} key ={row, col}
+                    status={ status } value = { square }
+                onClick={this.clickHandler.bind(this, row, col)}/>);
+
+        }
+
+        return cols
     }
 
     renderRows() {
         var rows = []
 
         for (let row = 0; row < 10; row++){
-            rows.push(<tr key={`${rows}`}>{this.renderCol(row)}</tr>);
+            rows.push(<tr key={`${row}`}>{this.renderCol(row)}</tr>);
         }
 
         return rows

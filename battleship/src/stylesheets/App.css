@@ -57,9 +57,6 @@ table {
 .cell {
  background-color: white;
 }
-.active {
-    background-color: red;
-}
 
 .hit {
     background-color: red;
