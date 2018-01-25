@@ -2,155 +2,156 @@ import React, { Component } from 'react';
 import Square from './square';
 import ScoreBoard from './scoreboard';
 
+const EMPTY = 0
+const SHIP = 1
+const MISS = 2
+const HIT = 3
+
+const shipDetails = [
+    {name: "Carrier", size: 5},
+    {name: "Battleship", size: 4},
+    {name: "Destroyer", size: 3},
+    {name: "Submarine", size: 3},
+    {name: "Frigate", size: 2},
+]
+
 class Board extends Component {
-    constructor(props){
+    constructor(props) {
         super(props)
+
         this.state = {
-            board: [],
-            status: [0,1,2,3],
-            shipCount: 5,
-            shipDetails: [
-                {name: "Carrier", size: 5},
-                {name: "Battleship", size: 4},
-                {name: "Destroyer", size: 3},
-                {name: "Submarine", size: 3},
-                {name: "Frigate", size: 2},
-            ],
-            activeIndex: [],
-            torpedoes: 50
+            board: this.setUpBoard(),
+            shotsRemaining: this.props.maxShots
         }
     }
 
-    componentWillMount(){
-        this.setUpBoard();
+    componentWillMount() {
+        this.placeShips()
     }
-
-
-
-    createCol(row){
-    // let boardNum =
-    var columns = []
-    for (let col = 0; col < 10; col++){
-    // console.log(this.state.board[col][row]);
-    columns.push(<Square key={`${col}_${row}`} id={`${col}_${row}`}
-        cell={this.state.board[col][row]}
-        isActive={this.state.activeIndex.find((i) => {
-            return i === `${col}_${row}`
-        } ) }  onClick={this.clickHandler.bind(this)}/>);
-
-        }
-        return columns
-    }
-
-    createRows(){
-        var rows = []
-            for (let row = 0; row < 10; row++){
-                rows.push(<tr key={`${row}`}>{this.createCol(row)}</tr>);
-            }
-            return rows
-        }
 
     setUpBoard() {
         let board = []
-        var boardNum = 0
-        for(let i = 0; i < 10; i++){
+
+        for(let row = 0; row < 10; row++){
             board.push([])
-            for(let j = 0; j < 10; j++){
-                board[i][j] = this.state.status[boardNum];
+            for(let col = 0; col < 10; col++){
+                board[row][col] = EMPTY
             }
         }
-        console.log(board);
 
-        for (let i = 0; i < this.state.shipCount; i++){
-            board = this.placeShip(board, boardNum);
-        }
-        this.setState({board: board})
+        console.log(board)
+
+        return board
     }
 
-    placeShip(board, boardNum) {
+    placeShips(board) {
+        for (let i = 0; i < this.props.shipCount; i++){
+            board = this.placeShip();
+        }
+    }
+
+    placeShip() {
+        const board = this.state.board
+
         var row = Math.floor(Math.random()*10)
         var col = Math.floor(Math.random()*10)
-        var cellState = this.state.status
-        var shipCoor = this.state.shipDetails.map((i) =>{
-            return i.size
-        })
-            if(board[col][row] == cellState[boardNum]){
-               board[col][row] = cellState[boardNum + 1]
-           }
+
+        // var shipCoor = this.state.shipDetails.map((i) =>{
+        //     return i.size
+        // })
+
+        // TODO: when placing multiple ships this might stackoverflow
+
+        if(board[row][col] === EMPTY) {
+            board[row][col] = SHIP
+        } else if(board[row][col] === SHIP) {
+            this.placeShip()
+        }
 
         // console.log(col, " by ", row, " = ", board[col][row]);
-        // console.log("status", cellState)
         // console.log(board);
-        return board;
+
+        this.setState({
+            board: board
+        })
     }
 
-    clickHandler(e){
-        var cell = e.target.id
-        var col = cell.split("_")[0]
-        var row = cell.split("_")[1]
-        console.log(e.target);
-        console.log(col)
-        console.log(row);
-        var boardPlace = this.state.board[col][row]
-        console.log("boardPlace",boardPlace);
-        var shots = []
-        shots.push(cell)
-            this.setState({activeIndex: this.state.activeIndex.concat([cell])})
-            this.userMoves(cell, boardPlace);
-        // console.log(this.state.activeIndex);
+    clickHandler(row, col){
+        const { board, shotsRemaining } = this.state
+
+        console.log(row)
+        console.log(col);
+
+        if (board === EMPTY ){
+            board[row][col] = MISS
+
+            this.setState({shotsRemaining: shotsRemaining-1})
+        } else if(board === SHIP){
+            board[row][col] = HIT
+
+            this.setState({shotsRemaining: shotsRemaining-1})
+        } else if(shotsRemaining <= 0){
+            alert ("You Lose")
+        }
     }
 
-    userMoves(cell, boardPlace){
-        var col = cell.split("_")[0]
-        var row = cell.split("_")[1]
-        var userClicks = this.state.activeIndex
-        var cellState = this.state.status
-        var userHits = this.state.activeIndex.length + 1
-        var torpedoes = this.state.torpedoes
-        console.log(cell);
-        console.log("UserMoves:" , userHits)
-        console.log("torpedoes:" , torpedoes)
-            if (boardPlace === 0){
-                this.state.board[col][row] = this.setState({cellState[3]})
-                // BUG fix state change
-                torpedoes --
-                this.setState({torpedoes: torpedoes})
-            } if (boardPlace === 1){
-                cellState[boardPlace ++]
-                torpedoes --
-                this.setState({torpedoes: torpedoes})
-            }if(userHits === 50){
-                alert ("You Lose")
-            }
-            console.log("boardPlace",cellState[boardPlace]);
-    }
-    //FIXME: if the coordiates of a cell = a value inside the array do not subtract a torpedo.
-    //4 possible states for each cell: empty, ship, miss, hit assign numbers to each within the grid
+    //FIXME:
+    //4 possible states for each cell: empty, ship, miss, hit assign numbers to each within the grid.
+    // all cells start empty = 0,
+    // after ships are placed ship cells = 1
     // after click and no ship in the cell; cell changes from 0 to miss = 2 and one torpedo subtracted
     // if after click cell has ship = 1 then change cell to hit = 3 and one torpedo subtracted
-    //if clicked cell = 2 or 3 no torpedoes subtracted
-
-
+    //if clicked cell = 2 or 3 no shotsRemaining subtracted
 
 
     // TODO: shipCoordiates needs to pull random coordiates that = the number of cells that is the length of each ship ex: Destroyer length is 3 needs 3 coordiates
-    // all cells start empty = 0,
-    // after ships are placed ship cells = 1
+    renderCol(row) {
+        var cols = []
 
+            for (let col = 0; col < 10; col++){
+                // console.log(this.state.board[row][col]);
+                cols.push(
+                    <Square key={`${row}_${col}`} id={`${row}_${col}`}
+                        cellstate={this.state.board[row][col]}
+                        status={this.state.activeIndex.find((i) => {
 
-    render(){
-            // console.log(this.state.board);
+                                return i === `${row}_${col}`
+                        } ) }
+                    // isShip={this.state.status.find((i)=>{
+                    //     return i === this.state.status[1]
+                    // })}
+                    onClick={this.clickHandler.bind(this, row, col)}/>);
+
+            }
+
+            return cols
+    }
+
+    renderRows() {
+        var rows = []
+
+        for (let row = 0; row < 10; row++){
+            rows.push(<tr key={`${rows}`}>{this.renderCol(row)}</tr>);
+        }
+
+        return rows
+    }
+
+    render() {
+        const { shotsRemaining } = this.state
         return (
             <div>
-            <div><ScoreBoard torpedoes={this.state.torpedoes} ships={this.state.shipCount}/></div>
-            <div className="board-container">
+                <div>
+                    <ScoreBoard shotsRemaining={shotsRemaining} ships={0}/>
+                </div>
+                <div className="board-container">
                     <table>
                         <tbody>
-                                {this.createRows()}
+                            {this.renderRows()}
                         </tbody>
                     </table>
+                </div>
             </div>
-        </div>
         )
     }
 }

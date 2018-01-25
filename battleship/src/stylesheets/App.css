@@ -60,3 +60,10 @@ table {
 .active {
     background-color: red;
 }
+
+.hit {
+    background-color: red;
+}
+.miss {
+    background-color: green;
+}

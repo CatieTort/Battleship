@@ -11,7 +11,7 @@ class App extends Component {
     return (
       <div>
       <Header />
-        <Board />
+        <Board boardSize={10} shipCount={5} maxShots={50} />
       </div>
     );
   }
