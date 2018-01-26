@@ -7,6 +7,9 @@ const SHIP = 1
 const MISS = 2
 const HIT = 3
 
+const HORIZONTAL = 0
+const VERTICAL = 1
+
 const shipDetails = [
     {name: "Carrier", size: 5},
     {name: "Battleship", size: 4},
@@ -28,7 +31,9 @@ class Board extends Component {
     componentWillMount() {
         this.placeShips()
     }
-
+    //4 possible states for each cell: empty, ship, miss, hit assign numbers to each within the grid.
+    // all cells start empty = 0,
+    // after ships are placed ship cells = 1
     setUpBoard() {
         let board = []
 
@@ -39,27 +44,39 @@ class Board extends Component {
             }
         }
 
-        console.log(board)
+        // console.log(board)
 
         return board
     }
 
     placeShips(board) {
+
+        for(let ship = 0; ship < shipDetails.length; ship++){
+            this.placeShip(shipDetails.size)
+        }
+
         for (let i = 0; i < this.props.shipCount; i++){
             board = this.placeShip();
         }
     }
 
-    placeShip() {
+    placeShip(size) {
         const board = this.state.board
 
+        var orientation = Math.floor(Math.random()*1)
         var row = Math.floor(Math.random()*10)
         var col = Math.floor(Math.random()*10)
+        //TODO: add checkspaces function 
+        // pull random coordiates that = the number of cells that is the length of each ship
+        for (let i = 0; i < size; i++){
 
-        // var shipCoor = this.state.shipDetails.map((i) =>{
-        //     return i.size
-        // })
+            if(orientation === HORIZONTAL){
+                board[row + i][col] = SHIP
+            }else{
+                board[row][col + i] = SHIP
+            }
 
+        }
         // TODO: when placing multiple ships this might stackoverflow
 
         if(board[row][col] === EMPTY) {
@@ -76,21 +93,26 @@ class Board extends Component {
         })
     }
 
+    checkArea(){
+
+    }
+
     clickHandler(row, col){
         let { board, shotsRemaining } = this.state
 
-        console.log(row)
-        console.log(col);
+        // console.log(row)
+        // console.log(col);
 
         if (board[row][col] === EMPTY ){
             board[row][col] = MISS
-
+        // after click and no ship in the cell; cell changes from 0 to miss = 2 and one torpedo subtracted
             this.setState({
                 shotsRemaining: shotsRemaining-1,
                 board: board
             })
         } else if(board[row][col] === SHIP){
             board[row][col] = HIT
+        // if after click cell has ship = 1 then change cell to hit = 3 and one torpedo subtracted
 
             this.setState({
                 shotsRemaining: shotsRemaining-1,
@@ -99,19 +121,10 @@ class Board extends Component {
         } else if(shotsRemaining <= 0){
             alert ("You Lose")
         }
-        console.log(board);
+        // console.log(board);
     }
 
-    //FIXME:
-    //4 possible states for each cell: empty, ship, miss, hit assign numbers to each within the grid.
-    // all cells start empty = 0,
-    // after ships are placed ship cells = 1
-    // after click and no ship in the cell; cell changes from 0 to miss = 2 and one torpedo subtracted
-    // if after click cell has ship = 1 then change cell to hit = 3 and one torpedo subtracted
-    //if clicked cell = 2 or 3 no shotsRemaining subtracted
 
-
-    // TODO: shipCoordiates needs to pull random coordiates that = the number of cells that is the length of each ship ex: Destroyer length is 3 needs 3 coordiates
     renderCol(row) {
         const { board } = this.state
 
