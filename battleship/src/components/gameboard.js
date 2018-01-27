@@ -2,15 +2,15 @@ import React, { Component } from 'react';
 import Square from './square';
 import ScoreBoard from './scoreboard';
 
-const EMPTY = 0
-const SHIP = 1
-const MISS = 2
-const HIT = 3
+export const EMPTY = 0
+export const SHIP = 1
+export const MISS = 2
+export const HIT = 3
 
 const HORIZONTAL = 0
 const VERTICAL = 1
 
-const shipDetails = [
+const SHIPS = [
     {name: "Carrier", size: 5},
     {name: "Battleship", size: 4},
     {name: "Destroyer", size: 3},
@@ -41,11 +41,13 @@ class Board extends Component {
         for(let row = 0; row < 10; row++){
             board.push([])
             for(let col = 0; col < 10; col++){
-                board[row][col] = EMPTY
+                board[row][col] = {
+                    status: EMPTY
+                }
             }
         }
 
-        // console.log(board)
+        console.log(board)
 
         return board
     }
@@ -53,13 +55,13 @@ class Board extends Component {
     checkArea(board, row, col, size, orientation){
         for(let i = 0; i < size; i++){
             // console.log(board);
-            if(board[row][col] === SHIP){
+            if(board[row][col].status === SHIP){
                 return false
             }else if(orientation === HORIZONTAL){
 
                 if(row + size >= 10){
                     return false
-                }else if(board[row + i][col] === SHIP){
+                }else if(board[row + i][col].status === SHIP){
                     return false
                 }
 
@@ -67,7 +69,7 @@ class Board extends Component {
 
                 if(col + size >= 10){
                     return false
-                }else if(board[row][col + i] === SHIP){
+                }else if(board[row][col + i].status === SHIP){
                     return false
                 }
 
@@ -79,50 +81,48 @@ class Board extends Component {
 
     placeShips() {
         const { board } = this.state
-        let size
 
-        for(let i = 0; i < shipDetails.length; i++){
-            size = shipDetails[i].size
-            console.log("size:", size);
-            this.placeShip(size)
+        for(let i = 0; i < SHIPS.length; i++){
+
+            console.log("size:", SHIPS[i].size);
+
+            this.placeShip(SHIPS[i])
         }
-        console.log("board:", board);
+
+        // console.log("board:", board);
     }
 
-    placeShip(size) {
+    placeShip(ship) {
         const { board } = this.state
 
         var orientation = Math.floor(Math.random()*2)
         var row = Math.floor(Math.random()*10)
         var col = Math.floor(Math.random()*10)
-            console.log("orientation:",orientation);
-            console.log("row:",row);
-            console.log("col",col);
-        let checkArea = this.checkArea(board, row, col, size, orientation)
+
+        console.log("orientation:",orientation);
+        console.log("row:",row);
+        console.log("col",col);
+
         // pull random coordiates that = the number of cells that is the length of each ship
-        if(checkArea === false){
-            return this.placeShip(size)
-        }else{
-
-            for (let i = 0; i < size; i++){
-
+        if(this.checkArea(board, row, col, ship.size, orientation) === false){
+            return this.placeShip(ship)
+        } else {
+            for (let i = 0; i < ship.size; i++){
                 if(orientation === HORIZONTAL){
-                    board[row + i][col] = SHIP
-                }else{
-                    board[row][col + i] = SHIP
+                    board[row + i][col] = {
+                        status: SHIP,
+                        name: ship.name,
+                        position: i
+                    }
+                } else {
+                    board[row][col + i] = {
+                        status: SHIP,
+                        name: ship.name,
+                        position: i
+                    }
                 }
             }
         }
-        // TODO: when placing multiple ships this might stackoverflow
-
-        // if(board[row][col] === EMPTY) {
-        //     board[row][col] = SHIP
-        // } else if(board[row][col] === SHIP) {
-        //     this.placeShip()
-        // }
-
-        // console.log(col, " by ", row, " = ", board[col][row]);
-        // console.log(board);
 
         this.setState({
             board: board
@@ -134,8 +134,8 @@ class Board extends Component {
     //     //have: name & ship size & coordinates
     //     // If coordinates is equal to Hit then check which ship
     //     //Then how many hits that ship has received & compare to ship size
-    //     if(shipDetails.size === 5){
-    //         return "You sunk the " + shipDetails[i].name
+    //     if(SHIPS.size === 5){
+    //         return "You sunk the " + SHIPS[i].name
     //     }
     //
     //     shipCoor.push([row,col])
@@ -163,15 +163,15 @@ class Board extends Component {
         // console.log(row)
         // console.log(col);
 
-        if (board[row][col] === EMPTY ){
-            board[row][col] = MISS
+        if (board[row][col].status === EMPTY ){
+            board[row][col].status = MISS
         // after click and no ship in the cell; cell changes from 0 to miss = 2 and one torpedo subtracted
             this.setState({
                 shotsRemaining: shotsRemaining-1,
                 board: board
             })
-        } else if(board[row][col] === SHIP){
-            board[row][col] = HIT
+        } else if(board[row][col].status === SHIP){
+            board[row][col].status = HIT
             // this.sinkShip(board, row, col)
         // if after click cell has ship = 1 then change cell to hit = 3 and one torpedo subtracted
 
@@ -192,25 +192,12 @@ class Board extends Component {
         var cols = []
 
         for (let col = 0; col < 10; col++){
-            // console.log(this.state.board[row][col]);
-            var status = ''
-            let square = board[row][col]
-
-            if ( square === HIT ){
-                status = 'hit'
-            }else if( square === MISS ){
-                status = 'miss'
-            }else if(square === SHIP){
-                status = 'ship'
-            }else{
-                status = 'cell'
-            }
-
             cols.push(
-                <Square id={row, col} key ={row, col}
-                    status={ status } value = { square }
-                onClick={this.clickHandler.bind(this, row, col)}/>);
-
+                <Square
+                    id={row, col}
+                    key={row, col}
+                    status={board[row][col].status}
+                    onClick={this.clickHandler.bind(this, row, col)}/>)
         }
 
         return cols
