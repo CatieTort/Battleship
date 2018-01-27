@@ -13,3 +13,7 @@ class Square extends Component {
 
 
 export default Square;
+
+
+//BUG: ships overlap
+// ships go off board?

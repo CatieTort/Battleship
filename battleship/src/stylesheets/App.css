@@ -64,3 +64,7 @@ table {
 .miss {
     background-color: green;
 }
+
+.ship {
+    background-color: gray;
+}

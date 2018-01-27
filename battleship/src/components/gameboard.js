@@ -24,7 +24,8 @@ class Board extends Component {
 
         this.state = {
             board: this.setUpBoard(),
-            shotsRemaining: this.props.maxShots
+            shotsRemaining: this.props.maxShots,
+            ships: this.props.shipCount
         }
     }
 
@@ -49,41 +50,76 @@ class Board extends Component {
         return board
     }
 
-    placeShips(board) {
+    checkArea(board, row, col, size, orientation){
+        for(let i = 0; i < size; i++){
+            // console.log(board);
+            if(board[row][col] === SHIP){
+                return false
+            }else if(orientation === HORIZONTAL){
 
-        for(let ship = 0; ship < shipDetails.length; ship++){
-            this.placeShip(shipDetails.size)
-        }
+                if(row + size >= 10){
+                    return false
+                }else if(board[row + i][col] === SHIP){
+                    return false
+                }
 
-        for (let i = 0; i < this.props.shipCount; i++){
-            board = this.placeShip();
+            }else if (orientation === VERTICAL){
+
+                if(col + size >= 10){
+                    return false
+                }else if(board[row][col + i] === SHIP){
+                    return false
+                }
+
+            }else{
+                return true
+            }
         }
     }
 
-    placeShip(size) {
-        const board = this.state.board
+    placeShips() {
+        const { board } = this.state
+        let size
 
-        var orientation = Math.floor(Math.random()*1)
+        for(let i = 0; i < shipDetails.length; i++){
+            size = shipDetails[i].size
+            console.log("size:", size);
+            this.placeShip(size)
+        }
+        console.log("board:", board);
+    }
+
+    placeShip(size) {
+        const { board } = this.state
+
+        var orientation = Math.floor(Math.random()*2)
         var row = Math.floor(Math.random()*10)
         var col = Math.floor(Math.random()*10)
-        //TODO: add checkspaces function 
+            console.log("orientation:",orientation);
+            console.log("row:",row);
+            console.log("col",col);
+        let checkArea = this.checkArea(board, row, col, size, orientation)
         // pull random coordiates that = the number of cells that is the length of each ship
-        for (let i = 0; i < size; i++){
+        if(checkArea === false){
+            return this.placeShip(size)
+        }else{
 
-            if(orientation === HORIZONTAL){
-                board[row + i][col] = SHIP
-            }else{
-                board[row][col + i] = SHIP
+            for (let i = 0; i < size; i++){
+
+                if(orientation === HORIZONTAL){
+                    board[row + i][col] = SHIP
+                }else{
+                    board[row][col + i] = SHIP
+                }
             }
-
         }
         // TODO: when placing multiple ships this might stackoverflow
 
-        if(board[row][col] === EMPTY) {
-            board[row][col] = SHIP
-        } else if(board[row][col] === SHIP) {
-            this.placeShip()
-        }
+        // if(board[row][col] === EMPTY) {
+        //     board[row][col] = SHIP
+        // } else if(board[row][col] === SHIP) {
+        //     this.placeShip()
+        // }
 
         // console.log(col, " by ", row, " = ", board[col][row]);
         // console.log(board);
@@ -93,9 +129,33 @@ class Board extends Component {
         })
     }
 
-    checkArea(){
+    // sinkShip(board, row, col){
+    //     var shipCoor = []
+    //     //have: name & ship size & coordinates
+    //     // If coordinates is equal to Hit then check which ship
+    //     //Then how many hits that ship has received & compare to ship size
+    //     if(shipDetails.size === 5){
+    //         return "You sunk the " + shipDetails[i].name
+    //     }
+    //
+    //     shipCoor.push([row,col])
+    //     console.log("ShipCoor", shipCoor);
+    //
+    //
+    //     for(let i = 0; i < size; i++){
+    //         if (board[row][col + i] === HIT){
+    //             // can only be run if orientation is V
+    //             if(board[row = i][col]){
+    //             // can only be run if orientation is H
+    //             }
+    //
+    //         }else{
+    //
+    //         }
+    //     }
+    //
+    // }
 
-    }
 
     clickHandler(row, col){
         let { board, shotsRemaining } = this.state
@@ -112,6 +172,7 @@ class Board extends Component {
             })
         } else if(board[row][col] === SHIP){
             board[row][col] = HIT
+            // this.sinkShip(board, row, col)
         // if after click cell has ship = 1 then change cell to hit = 3 and one torpedo subtracted
 
             this.setState({
@@ -139,6 +200,8 @@ class Board extends Component {
                 status = 'hit'
             }else if( square === MISS ){
                 status = 'miss'
+            }else if(square === SHIP){
+                status = 'ship'
             }else{
                 status = 'cell'
             }
@@ -164,11 +227,11 @@ class Board extends Component {
     }
 
     render() {
-        const { shotsRemaining } = this.state
+        const { shotsRemaining, ships } = this.state
         return (
             <div>
                 <div>
-                    <ScoreBoard shotsRemaining={shotsRemaining} ships={0}/>
+                    <ScoreBoard shotsRemaining={shotsRemaining} ships={ships}/>
                 </div>
                 <div className="board-container">
                     <table>
